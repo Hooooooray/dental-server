@@ -1,0 +1,151 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// 定义性别的枚举
+enum Gender {
+  MALE // 男
+  FEMALE // 女
+  UNKNOWN // 未知
+}
+
+// 定义介绍人类型的枚举
+enum ReferrerType {
+  PATIENT // 患者介绍
+  EMPLOYEE // 员工介绍
+}
+
+// 定义患者类型的枚举
+enum PatientType {
+  TEMPORARY // 临时
+  ORDINARY // 普通
+  DENTAL_IMPLANTATION // 牙医种植
+  DENTAL_ORTHODONTICS // 牙医正畸
+  DENTAL_RESTORATION // 牙医修复
+  DENTAL_CARE // 牙医护理
+  CHILDRENS_TEETH // 儿童牙齿
+  INFORMATION // 资讯
+  TOOTH_EXTRACTION // 拔牙
+  TOOTH_INLAY // 镶牙
+  PERIODONTAL // 牙周
+  ORTHODONTICS // 矫正
+  IMPLANTATION // 种植
+}
+
+enum PhoneType {
+  SELF // 本人
+  FAMILY // 家属
+  FRIEND // 朋友
+  OTHER // 其他
+}
+
+enum ConsultationProject {
+  TOOTH_EXTRACTION // 拔牙
+  TOOTH_FILLING // 补牙
+  TOOTH_IMPLANTATION // 种牙
+  TOOTH_INLAY // 镶牙
+  ORTHODONTICS // 正畸
+  TEETH_CLEANING // 洗牙
+}
+
+// 定义患者表模型
+model Patient {
+  id                  Int                 @id @default(autoincrement()) // 患者唯一标识符，自增生成
+  institution         String // 患者所属机构
+  patientType         PatientType // 患者类型，使用枚举类型
+  customerID          Int // 客户号，可能是一个整数或其他唯一标识符
+  name                String // 患者姓名
+  consultationProject ConsultationProject // 咨询项目
+  acceptancePerson    String // 受理人
+  createdAt           DateTime            @default(now()) // 创建时间
+
+  // Optional Fields
+  avatar                  String? // 患者头像，可以是图片的URL或Base64编码等形式
+  phone                   String? // 手机号码
+  phoneType               PhoneType? // 电话类型，使用枚举类型
+  idCardNo                String? // 身份证号码
+  gender                  Gender? // 性别，使用枚举类型
+  birthDate               DateTime? // 出生日期
+  nickname                String? // 昵称
+  referrerType            ReferrerType? // 介绍人类型，使用枚举类型
+  referralSource          String? // 患者来源，可能是一个介绍人的描述或其他信息
+  addressProvince         String? // 家庭地址省份
+  addressCity             String? // 家庭地址城市
+  addressDistrict         String? // 家庭地址区/县
+  addressDetail           String? // 家庭详细地址
+  source                  String? // 患者信息来源
+  weChat                  String? // 患者的微信号
+  patientNotes            String? // 患者的备注信息，可以是一段文本
+  age                     Int? // 患者的年龄
+  patientTags             String? // 患者标签，用于标识患者的特定特征或条件
+  qq                      String? // 患者的 QQ 号码
+  issuingAuthority        String? // 身份证发证机关
+  email                   String? // 患者的电子邮件地址
+  nationality             String? // 患者的国籍
+  otherMedicalRecordNo    String? // 其他病历号，可能是其他医疗系统中的标识符
+  expiryDate              DateTime? // 身份证有效期截止日期
+  medicalSocialSecurityNo String? // 医疗社保号，用于社会医疗保险标识
+}
+
+// 定义员工岗位的枚举
+enum EmployeePosition {
+  ADMINISTRATOR           // 管理员
+  DOCTOR                  // 医生
+  NURSE                   // 护士
+  FRONT_DESK              // 前台
+  ADMINISTRATIVE          // 行政
+  FINANCE                 // 财务
+  ASSISTANT               // 助理
+  COUNSELOR               // 咨询师
+  CUSTOMER_SERVICE        // 客服
+  PROCUREMENT             // 采购
+  WAREHOUSE_KEEPER        // 库管
+}
+
+// 定义牙医科室的枚举
+enum DentalDepartment {
+  GENERAL_DENTISTRY        // 综合牙科
+  DENTAL_IMPLANTATION      // 牙医种植
+  DENTAL_ORTHODONTICS      // 牙医正畸
+  DENTAL_RESTORATION       // 牙医修复
+  DENTAL_CARE              // 牙医护理
+  CHILDRENS_TEETH          // 儿童牙科
+  PERIODONTAL              // 牙周科
+  ORTHODONTICS             // 矫正科
+  TOOTH_EXTRACTION         // 牙齿拔除
+  TOOTH_INLAY              // 牙齿镶嵌
+}
+
+enum EmploymentStatus {
+  ACTIVE
+  ON_LEAVE
+  RESIGNED
+}
+
+
+model Employee {
+  employeeID          Int                   @id @default(autoincrement()) // 员工唯一标识符，自增生成
+  name                String                // 员工姓名
+  position            EmployeePosition      // 员工岗位，使用枚举类型
+  dentalDepartment    DentalDepartment      // 牙医科室，使用牙医科室的枚举类型
+  businessInstitution String                // 业务机构
+  gender              Gender                // 性别，使用枚举类型
+  address             String                // 家庭住址
+  employmentStatus    EmploymentStatus                // 在职状态
+
+  // 可选字段
+  title               String?               // 职称
+  phone               String?               // 员工手机号码
+  professionalLicenseNo String?             // 医生职业证书号
+  email               String?               // 员工电子邮件地址
+  birthDate           DateTime?             // 出生日期
+  hireDate            DateTime?             // 入职日期，选择日期
+}
+
+
+
