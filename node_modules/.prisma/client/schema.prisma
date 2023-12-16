@@ -107,6 +107,14 @@ enum EmployeePosition {
   WAREHOUSE_KEEPER        // 库管
 }
 
+enum Department {
+  MEDICAL            // 医疗部
+  COUNSELING         // 咨询部
+  OPERATIONS         // 经营部
+  LOGISTICS          // 后勤部
+  FINANCE            // 财务部
+}
+
 // 定义牙医科室的枚举
 enum DentalDepartment {
   GENERAL_DENTISTRY        // 综合牙科
@@ -132,13 +140,14 @@ model Employee {
   employeeID          Int                   @id @default(autoincrement()) // 员工唯一标识符，自增生成
   name                String                // 员工姓名
   position            EmployeePosition      // 员工岗位，使用枚举类型
+  department          Department            // 部门，使用枚举类型
   dentalDepartment    DentalDepartment      // 牙医科室，使用牙医科室的枚举类型
-  businessInstitution String                // 业务机构
   gender              Gender                // 性别，使用枚举类型
-  address             String                // 家庭住址
-  employmentStatus    EmploymentStatus                // 在职状态
+
 
   // 可选字段
+  employmentStatus    EmploymentStatus?      // 在职状态
+  address             String?               // 家庭住址
   title               String?               // 职称
   phone               String?               // 员工手机号码
   professionalLicenseNo String?             // 医生职业证书号

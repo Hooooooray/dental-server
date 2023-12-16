@@ -9,11 +9,9 @@ const router = express.Router();
 router.post('/employee/add', checkSchema({
     name: { notEmpty: true, errorMessage: '员工姓名不能为空' },
     position: { notEmpty: true, errorMessage: '员工岗位不能为空' },
+    department:{notEmpty:true,errorMessage:'部门不能为空'},
     dentalDepartment: { notEmpty: true, errorMessage: '牙医科室不能为空' },
-    businessInstitution: { notEmpty: true, errorMessage: '业务机构不能为空' },
     gender: { notEmpty: true, errorMessage: '性别不能为空' },
-    address: { notEmpty: true, errorMessage: '家庭住址不能为空' },
-    employmentStatus: { notEmpty: true, errorMessage: '在职状态不能为空' },
 }), async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
