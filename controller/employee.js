@@ -96,4 +96,19 @@ router.get('/employees', async (req, res) => {
     }
 });
 
+router.get('/employee/maxID',async (req,res)=>{
+    try{
+        const id = await prisma.Employee.findFirst({
+            select: {
+                employeeID: true,
+            },
+            orderBy: { employeeID: 'desc' },
+        });
+        res.success(id);
+    }catch (error){
+        console.error('Error fetching employees:', error);
+        res.fail('查询员工失败');
+    }
+})
+
 export default router;

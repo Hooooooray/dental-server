@@ -130,9 +130,10 @@ enum DentalDepartment {
 }
 
 enum EmploymentStatus {
-  ACTIVE
-  ON_LEAVE
-  RESIGNED
+  ACTIVE //在职
+  ON_LEAVE //休假
+  PROBATION // 新增试用期状态
+  RESIGNED //离职
 }
 
 
