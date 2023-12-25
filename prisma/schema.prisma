@@ -154,8 +154,5 @@ model Employee {
   professionalLicenseNo String?             // 医生职业证书号
   email               String?               // 员工电子邮件地址
   birthDate           DateTime?             // 出生日期
-  hireDate            DateTime?             // 入职日期，选择日期
+  hireDate            DateTime?             // 入职日期
 }
-
-
-
