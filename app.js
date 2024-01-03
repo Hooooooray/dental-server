@@ -5,6 +5,7 @@ import patient from "./controller/patient.js";
 import employee from "./controller/employee.js";
 import permission from "./controller/permission.js"
 import user from "./controller/user.js"
+import role from "./controller/role.js"
 
 const app = express()
 
@@ -51,6 +52,7 @@ function verifyToken(req, res, next) {
 app.use(verifyToken,patient)
 app.use(verifyToken,employee)
 app.use(verifyToken,permission)
+app.use(verifyToken,role)
 app.use(user)
 
 const PORT = 3006

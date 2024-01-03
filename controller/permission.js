@@ -6,14 +6,29 @@ const prisma = new PrismaClient()
 
 const router = express.Router()
 
-router.get('/permissions',async(req,res)=>{
-    try{
-        const permissions = await prisma.Permission.findMany();
+// router.get('/permissions',async(req,res)=>{
+//     try{
+//         const permissions = await prisma.Permission.findMany();
+//         res.success(permissions);
+//     }catch(error){
+//         console.error(error)
+//         res.fail('查询权限列表失败')
+//     }
+// })
+
+// 在你的路由处理程序中
+router.get('/permissions', async (req, res) => {
+    try {
+        const permissions = await prisma.Permission.findMany({
+            where: { parentId: null }, // 获取顶级权限
+            include: { children: { include: { children: {} } } }, // 递归地获取子权限
+        });
         res.success(permissions);
-    }catch(error){
-        console.error(error)
-        res.fail('查询权限列表失败')
+    } catch (error) {
+        console.error(error);
+        res.fail('查询权限列表失败');
     }
-})
+});
+
 
 export default router
