@@ -36,4 +36,25 @@ router.post('/login', checkSchema({
     }
 })
 
+router.post('/verify',checkSchema({
+    token:{notEmpty:true,errorMessage:'toekn不能为空'}
+}),async(req,res)=>{
+    const token = req.headers['authorization'];
+    jwt.verify(token.split(' ')[1], secretKey, async(err, decoded) => {
+        if (err) return res.sendStatus(403);
+        const roleId = decoded.roleId
+        try {
+            const role = await prisma.Role.findFirst({
+                where: { id: Number(roleId) },
+            });
+            res.success(role);
+        } catch (error) {
+            console.error('Error fetching role by ID:', error);
+            res.fail('认证失败');
+        }
+    });
+})
+
+router.post('')
+
 export default router;

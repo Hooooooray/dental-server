@@ -42,7 +42,6 @@ function verifyToken(req, res, next) {
         return res.sendStatus(401);
     }
     jwt.verify(token.split(' ')[1], secretKey, (err, _res) => {
-        console.log('err', err)
         if (err) return res.sendStatus(403);
         req.user = res.user;
         next();
