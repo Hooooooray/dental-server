@@ -40,6 +40,26 @@ router.get('/role', checkSchema({
     }
 });
 
+router.post('/role/modifyPermission', checkSchema({
+    id: { notEmpty:true, errorMessage: '角色ID不能为空' },
+}), async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.fail(errors.array());
+    }
+    try {
+        const { id, permissions } = req.body
+        const response = await prisma.Role.update({
+            where: { id },
+            data: { permissions }
+        })
+        res.success(response)
+    } catch (error) {
+        console.error('Error fetching role by id and permissions:', error);
+        res.fail('修改权限失败');
+    }
+})
+
 // 查询员工类型列表
 router.get('/roles', async (req, res) => {
     try {
@@ -54,6 +74,7 @@ router.get('/roles', async (req, res) => {
         // 定义一个枚举类型的映射表
         const enumMap = {
             RoleType: {
+                ADMIN: '管理员',
                 SYSTEM: '系统角色',
                 CUSTOM: '自定义角色',
             }

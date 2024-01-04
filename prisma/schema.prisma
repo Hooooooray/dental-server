@@ -166,6 +166,7 @@ model User {
 
 // 定义角色类型的枚举
 enum RoleType {
+  ADMIN
   SYSTEM
   CUSTOM
 }
