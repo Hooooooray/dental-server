@@ -57,7 +57,7 @@ enum ConsultationProject {
 model Patient {
   id                  Int                 @id @default(autoincrement()) // 患者唯一标识符，自增生成
   institution         String // 患者所属机构
-  patientType         PatientType // 患者类型，使用枚举类型
+  patientType          PatientType // 患者类型，使用枚举类型
   customerID          Int // 客户号，可能是一个整数或其他唯一标识符
   name                String // 患者姓名
   consultationProject ConsultationProject // 咨询项目
@@ -182,9 +182,10 @@ model Role {
 model Permission {
   id        Int     @id @default(autoincrement())
   name      String  @unique
+  path      String?
+  component String?
   module    String? 
   subModule String?
-  path      String?
   operation String?
   parentId  Int?
   parent    Permission? @relation("ChildToParent", fields: [parentId], references: [id])
