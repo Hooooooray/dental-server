@@ -36,9 +36,7 @@ router.post('/login', checkSchema({
     }
 })
 
-router.post('/verify',checkSchema({
-    token:{notEmpty:true,errorMessage:'toekn不能为空'}
-}),async(req,res)=>{
+router.post('/verifyRole',async(req,res)=>{
     const token = req.headers['authorization'];
     jwt.verify(token.split(' ')[1], secretKey, async(err, decoded) => {
         if (err) return res.sendStatus(403);
@@ -50,6 +48,23 @@ router.post('/verify',checkSchema({
             res.success(role);
         } catch (error) {
             console.error('Error fetching role by ID:', error);
+            res.fail('认证失败');
+        }
+    });
+})
+
+router.post('/verifyUser',async(req,res)=>{
+    const token = req.headers['authorization']
+    jwt.verify(token.split(' ')[1], secretKey, async(err, decoded) => {
+        if (err) return res.sendStatus(403);
+        const userId = decoded.id
+        try {
+            const user = await prisma.User.findFirst({
+                where: { id: Number(userId) },
+            });
+            res.success(user);
+        } catch (error) {
+            console.error('Error fetching user by ID:', error);
             res.fail('认证失败');
         }
     });

@@ -56,22 +56,21 @@ enum ConsultationProject {
 // 定义患者表模型
 model Patient {
   id                  Int                 @id @default(autoincrement()) // 患者唯一标识符，自增生成
-  institution         String // 患者所属机构
   patientType          PatientType // 患者类型，使用枚举类型
-  customerID          Int // 客户号，可能是一个整数或其他唯一标识符
   name                String // 患者姓名
   consultationProject ConsultationProject // 咨询项目
   acceptancePerson    String // 受理人
   createdAt           DateTime            @default(now()) // 创建时间
 
   // Optional Fields
-  avatar                  String? // 患者头像，可以是图片的URL或Base64编码等形式
+  avatar                  Bytes? // 患者头像，可以是图片的URL或Base64编码等形式
   phone                   String? // 手机号码
   phoneType               PhoneType? // 电话类型，使用枚举类型
   idCardNo                String? // 身份证号码
   gender                  Gender? // 性别，使用枚举类型
   birthDate               DateTime? // 出生日期
   nickname                String? // 昵称
+  refereerName            String?
   referrerType            ReferrerType? // 介绍人类型，使用枚举类型
   referralSource          String? // 患者来源，可能是一个介绍人的描述或其他信息
   addressProvince         String? // 家庭地址省份
@@ -158,6 +157,7 @@ model Employee {
 model User {
   id       Int    @id @default(autoincrement())
   username String @unique
+  name String?
   password String
   // 用户与角色的关系：一个用户只能拥有一个角色
   roleId   Int? // 外键，关联到Role表的id字段

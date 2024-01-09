@@ -50,8 +50,8 @@ function verifyToken(req, res, next) {
 
 app.use(verifyToken,patient)
 app.use(verifyToken,employee)
-app.use(verifyToken,permission)
 app.use(verifyToken,role)
+app.use(permission)
 app.use(user)
 
 const PORT = 3006

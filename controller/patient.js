@@ -1,6 +1,6 @@
 import express from 'express';
-import {checkSchema, validationResult} from 'express-validator'
-import {PrismaClient} from "@prisma/client";
+import { checkSchema, validationResult } from 'express-validator'
+import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient()
 
@@ -8,12 +8,11 @@ const router = express.Router()
 
 // 新增患者
 router.post('/patient/add', checkSchema({
-    institution: {notEmpty: true, errorMessage: '患者所属机构不能为空'},
-    patientType: {notEmpty: true, errorMessage: '患者类型不能为空'},
-    customerID: {notEmpty: true, errorMessage: '客户号不能为空'},
-    name: {notEmpty: true, errorMessage: '患者姓名不能为空'},
-    consultationProject: {notEmpty: true, errorMessage: '咨询项目不能为空'},
-    acceptancePerson: {notEmpty: true, errorMessage: '受理人不能为空'},
+    id: { notEmpty: true, errorMessage: '客户号不能为空' },
+    name: { notEmpty: true, errorMessage: '患者姓名不能为空' },
+    patientType: { notEmpty: true, errorMessage: '患者类型不能为空' },
+    consultationProject: { notEmpty: true, errorMessage: '咨询项目不能为空' },
+    acceptancePerson: { notEmpty: true, errorMessage: '受理人不能为空' },
 }), async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -21,20 +20,18 @@ router.post('/patient/add', checkSchema({
     }
     try {
         const {
-            institution,
-            patientType,
-            customerID,
+            id,
             name,
+            patientType,
             consultationProject,
             acceptancePerson,
             ...otherFields
         } = req.body;
         const newPatient = await prisma.Patient.create({
             data: {
-                institution,
-                patientType,
-                customerID,
+                id,
                 name,
+                patientType,
                 consultationProject,
                 acceptancePerson,
                 ...otherFields, // Include other fields from the request body
@@ -49,7 +46,7 @@ router.post('/patient/add', checkSchema({
 
 // 编辑患者
 router.post('/patient/edit', checkSchema({
-    id: {notEmpty: true, errorMessage: '患者id不能为空'},
+    id: { notEmpty: true, errorMessage: '患者id不能为空' },
 }), async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -57,7 +54,7 @@ router.post('/patient/edit', checkSchema({
     }
     try {
         req.prisma = prisma
-        const {id, ...otherFields} = req.body;
+        const { id, ...otherFields } = req.body;
         const newPatient = await prisma.Patient.update({
             where: {
                 id
@@ -75,7 +72,7 @@ router.post('/patient/edit', checkSchema({
 
 //删除患者
 router.post('/patient/delete', checkSchema({
-    id: {notEmpty: true, errorMessage: '患者id不能为空'},
+    id: { notEmpty: true, errorMessage: '患者id不能为空' },
 }), async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -83,7 +80,7 @@ router.post('/patient/delete', checkSchema({
     }
     try {
         req.prisma = prisma
-        const {id} = req.body;
+        const { id } = req.body;
         const newPatient = await prisma.Patient.delete({
             where: {
                 id
@@ -98,7 +95,7 @@ router.post('/patient/delete', checkSchema({
 
 // 根据id查询患者
 router.post('/patient/select', checkSchema({
-    id: {notEmpty: true, errorMessage: '患者id不能为空'},
+    id: { notEmpty: true, errorMessage: '患者id不能为空' },
 }), async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -106,7 +103,7 @@ router.post('/patient/select', checkSchema({
     }
     try {
         req.prisma = prisma
-        const {id} = req.body;
+        const { id } = req.body;
         const newPatient = await prisma.Patient.delete({
             where: {
                 id
@@ -120,13 +117,13 @@ router.post('/patient/select', checkSchema({
 })
 
 router.get('/patient', checkSchema({
-    id: {notEmpty: true, errorMessage: "患者id不能为空"}
+    id: { notEmpty: true, errorMessage: "患者id不能为空" }
 }), async (req, res) => {
     try {
-        let {id} = req.query;
+        let { id } = req.query;
         id = Number(id)
         const patient = await prisma.Patient.findFirst({
-            where:{
+            where: {
                 id
             }
         })
@@ -139,7 +136,7 @@ router.get('/patient', checkSchema({
 
 router.get('/patients', async (req, res) => {
     try {
-        let {page = 1, pageSize = 10} = req.query;
+        let { page = 1, pageSize = 10 } = req.query;
         page = page ? Number(page) : 1;
         pageSize = pageSize ? Number(pageSize) : 10;
         console.log(page, pageSize)
@@ -153,5 +150,21 @@ router.get('/patients', async (req, res) => {
         res.fail('查询患者列表失败');
     }
 });
+
+// 查询员工号最大值
+router.get('/patient/maxID', async (req, res) => {
+    try {
+        const id = await prisma.Patient.findFirst({
+            select: {
+                id: true,
+            },
+            orderBy: { id: 'desc' },
+        });
+        res.success(id);
+    } catch (error) {
+        console.error('Error fetching Patient:', error);
+        res.fail('查询员工失败');
+    }
+})
 
 export default router
