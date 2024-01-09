@@ -136,15 +136,76 @@ router.get('/patient', checkSchema({
 
 router.get('/patients', async (req, res) => {
     try {
-        let { page = 1, pageSize = 10 } = req.query;
-        page = page ? Number(page) : 1;
-        pageSize = pageSize ? Number(pageSize) : 10;
-        console.log(page, pageSize)
+        let page = req.query.page || 1;
+        let pageSize = req.query.pageSize || 10;
+        page = parseInt(page)
+        pageSize = parseInt(pageSize)
+        let { id, name, phone } = req.query;
+        id = Number(id)
+        let where = {};
+        if (id) where.id = id;
+        if (name) where.name = { contains: name };
+        if (phone) where.phone = { contains: phone };
         const patients = await prisma.Patient.findMany({
             skip: (page - 1) * pageSize,
             take: pageSize,
+            where:where
         });
-        res.success(patients);
+        const total = await prisma.patient.count({where: where});
+        const enumMap = {
+            Gender: {
+                MALE: '男',
+                FEMALE: '女',
+                UNKNOWN: '未知'
+            },
+            ReferrerType: {
+                PATIENT: '患者介绍',
+                EMPLOYEE: '员工介绍'
+            },
+            PatientType: {
+                TEMPORARY: '临时',
+                ORDINARY: '普通',
+                DENTAL_IMPLANTATION: '牙医种植',
+                DENTAL_ORTHODONTICS: '牙医正畸',
+                DENTAL_RESTORATION: '牙医修复',
+                DENTAL_CARE: '牙医护理',
+                CHILDRENS_TEETH: '儿童牙齿',
+                INFORMATION: '资讯',
+                TOOTH_EXTRACTION: '拔牙',
+                TOOTH_INLAY: '镶牙',
+                PERIODONTAL: '牙周',
+                ORTHODONTICS: '矫正',
+                IMPLANTATION: '种植'
+            },
+            PhoneType: {
+                SELF: '本人',
+                FAMILY: '家属',
+                FRIEND: '朋友',
+                OTHER: '其他'
+            },
+            ConsultationProject: {
+                TOOTH_EXTRACTION: '拔牙',
+                TOOTH_FILLING: '补牙',
+                TOOTH_IMPLANTATION: '种牙',
+                TOOTH_INLAY: '镶牙',
+                ORTHODONTICS: '正畸',
+                TEETH_CLEANING: '洗牙'
+            }
+        };
+        patients.forEach((patient)=>{
+            patient.gender = enumMap.Gender[patient.gender]
+            patient.referrerType = enumMap.ReferrerType[patient.referrerType]
+            patient.patientType = enumMap.PatientType[patient.patientType]
+            patient.phoneType = enumMap.PatientType[patient.phoneType]
+            patient.consultationProject = enumMap.ConsultationProject[patient.consultationProject]
+        })
+
+        const response = {
+            success: true,
+            total,
+            data: patients,
+        };
+        res.status(200).json(response)
     } catch (error) {
         console.error('Error fetching patients by page and pageSize:', error);
         res.fail('查询患者列表失败');
