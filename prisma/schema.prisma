@@ -157,6 +157,7 @@ model Employee {
 model User {
   id       Int    @id @default(autoincrement())
   username String @unique
+  phone    String? @unique
   name String?
   password String
   // 用户与角色的关系：一个用户只能拥有一个角色

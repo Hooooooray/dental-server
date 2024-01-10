@@ -136,22 +136,38 @@ router.get('/patient', checkSchema({
 
 router.get('/patients', async (req, res) => {
     try {
+        let { id, name, phone, idCardNo, isTodayOnly, sortColumn, sortOrder } = req.query;
+        id = Number(id)
         let page = req.query.page || 1;
         let pageSize = req.query.pageSize || 10;
         page = parseInt(page)
         pageSize = parseInt(pageSize)
-        let { id, name, phone } = req.query;
-        id = Number(id)
+        console.log(sortColumn, sortOrder)
         let where = {};
         if (id) where.id = id;
         if (name) where.name = { contains: name };
         if (phone) where.phone = { contains: phone };
+        if (idCardNo) where.idCardNo = { contains: idCardNo }
+        if (isTodayOnly === 'true') {
+            const today = new Date();
+            const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+            const todayEnd = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1, 0, 0, 0, -1);
+            where.createdAt = {
+                gte: todayStart,
+                lte: todayEnd
+            };
+        }
+        let orderBy = {};
+        if (sortColumn && (sortOrder === 'ascend' || sortOrder === 'descend')) {
+            orderBy[sortColumn] = sortOrder === 'ascend' ? 'asc' : 'desc';
+        }
         const patients = await prisma.Patient.findMany({
             skip: (page - 1) * pageSize,
             take: pageSize,
-            where:where
+            where: where,
+            orderBy: orderBy
         });
-        const total = await prisma.patient.count({where: where});
+        const total = await prisma.patient.count({ where: where });
         const enumMap = {
             Gender: {
                 MALE: '男',
@@ -192,7 +208,7 @@ router.get('/patients', async (req, res) => {
                 TEETH_CLEANING: '洗牙'
             }
         };
-        patients.forEach((patient)=>{
+        patients.forEach((patient) => {
             patient.gender = enumMap.Gender[patient.gender]
             patient.referrerType = enumMap.ReferrerType[patient.referrerType]
             patient.patientType = enumMap.PatientType[patient.patientType]
