@@ -56,14 +56,15 @@ enum ConsultationProject {
 // 定义患者表模型
 model Patient {
   id                  Int                 @id @default(autoincrement()) // 患者唯一标识符，自增生成
-  patientType          PatientType // 患者类型，使用枚举类型
+  patientType         PatientType // 患者类型，使用枚举类型
   name                String // 患者姓名
   consultationProject ConsultationProject // 咨询项目
   acceptancePerson    String // 受理人
   createdAt           DateTime            @default(now()) // 创建时间
+  appointments Appointment[]
 
   // Optional Fields
-  avatar                  Bytes? // 患者头像，可以是图片的URL或Base64编码等形式
+  avatar                  Bytes?        @db.MediumBlob
   phone                   String? // 手机号码
   phoneType               PhoneType? // 电话类型，使用枚举类型
   idCardNo                String? // 身份证号码
@@ -142,6 +143,7 @@ model Employee {
   department       Department // 部门，使用枚举类型
   dentalDepartment DentalDepartment // 牙医科室，使用牙医科室的枚举类型
   gender           Gender // 性别，使用枚举类型
+  appointments Appointment[]
 
   // 可选字段
   employmentStatus      EmploymentStatus? // 在职状态
@@ -154,15 +156,44 @@ model Employee {
   hireDate              DateTime? // 入职日期
 }
 
+// 定义预约状态的枚举
+enum AppointmentStatus {
+  PENDING // 待处理
+  CONFIRMED // 已确认
+  CANCELLED // 已取消
+  COMPLETED // 已完成
+}
+
+// 定义预约表模型
+model Appointment {
+  id              Int               @id @default(autoincrement()) // 预约唯一标识符，自增生成
+  patientId       Int // 外键，关联到Patient表的id字段
+  employeeId      Int? // 外键，关联到Employee表的employeeID字段
+  service         String // 预约的服务项目
+  appointmentTime DateTime? // 预约时间
+  status          AppointmentStatus // 预约状态，使用枚举类型
+  createdAt       DateTime          @default(now()) // 创建预约的时间
+
+  // 可选字段
+  notes           String? // 预约的额外备注信息
+
+  // 关联到其他表
+  patient         Patient @relation(fields: [patientId], references: [id])
+  employee        Employee? @relation(fields: [employeeId], references: [employeeID])
+
+  // 可能还需要考虑的其他字段
+  // 如预约的具体时间段，预约的种类（初诊，复诊），是否需要提醒等
+}
+
 model User {
-  id       Int    @id @default(autoincrement())
-  username String @unique
+  id       Int     @id @default(autoincrement())
+  username String  @unique
   phone    String? @unique
-  name String?
+  name     String?
   password String
   // 用户与角色的关系：一个用户只能拥有一个角色
   roleId   Int? // 外键，关联到Role表的id字段
-  role     Role?  @relation(fields: [roleId], references: [id])
+  role     Role?   @relation(fields: [roleId], references: [id])
 }
 
 // 定义角色类型的枚举
@@ -173,22 +204,22 @@ enum RoleType {
 }
 
 model Role {
-  id       Int      @id @default(autoincrement())
-  roleName String
-  roleType RoleType @default(CUSTOM) // 添加角色类型字段
-  permissions String @default("")
+  id          Int      @id @default(autoincrement())
+  roleName    String
+  roleType    RoleType @default(CUSTOM) // 添加角色类型字段
+  permissions String   @default("")
   users       User[]
 }
 
 model Permission {
-  id        Int     @id @default(autoincrement())
-  name      String  @unique
+  id        Int          @id @default(autoincrement())
+  name      String       @unique
   path      String?
   component String?
-  module    String? 
+  module    String?
   subModule String?
   operation String?
   parentId  Int?
-  parent    Permission? @relation("ChildToParent", fields: [parentId], references: [id])
+  parent    Permission?  @relation("ChildToParent", fields: [parentId], references: [id])
   children  Permission[] @relation("ChildToParent")
 }

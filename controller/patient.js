@@ -54,7 +54,10 @@ router.post('/patient/edit', checkSchema({
     }
     try {
         req.prisma = prisma
-        const { id, ...otherFields } = req.body;
+        let { id, ...otherFields } = req.body;
+        // avatar = Buffer.from(avatar)
+        // console.log(avatar,'base64')
+    
         const newPatient = await prisma.Patient.update({
             where: {
                 id
@@ -214,6 +217,9 @@ router.get('/patients', async (req, res) => {
             patient.patientType = enumMap.PatientType[patient.patientType]
             patient.phoneType = enumMap.PatientType[patient.phoneType]
             patient.consultationProject = enumMap.ConsultationProject[patient.consultationProject]
+            if(patient.avatar){
+                patient.avatar = patient.avatar.toString('base64')
+            }
         })
 
         const response = {

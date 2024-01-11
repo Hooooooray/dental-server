@@ -6,9 +6,14 @@ import employee from "./controller/employee.js";
 import permission from "./controller/permission.js"
 import user from "./controller/user.js"
 import role from "./controller/role.js"
+import bodyParser from 'body-parser';
+import appointment from './controller/appointment.js'
 
 const app = express()
 
+// 允许最大为 50mb 的请求体
+app.use(bodyParser.json({ limit: '50mb' }));
+app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 app.use(cors());
 app.use(express.json())
 
@@ -51,6 +56,7 @@ function verifyToken(req, res, next) {
 app.use(verifyToken,patient)
 app.use(verifyToken,employee)
 app.use(verifyToken,role)
+app.use(appointment)
 app.use(permission)
 app.use(user)
 
