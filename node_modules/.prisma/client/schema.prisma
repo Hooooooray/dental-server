@@ -137,13 +137,15 @@ enum EmploymentStatus {
 }
 
 model Employee {
-  employeeID       Int              @id @default(autoincrement()) // 员工唯一标识符，自增生成
+  id       Int              @id @default(autoincrement()) // 员工唯一标识符，自增生成
   name             String // 员工姓名
   position         EmployeePosition // 员工岗位，使用枚举类型
   department       Department // 部门，使用枚举类型
   dentalDepartment DentalDepartment // 牙医科室，使用牙医科室的枚举类型
   gender           Gender // 性别，使用枚举类型
   appointments Appointment[]
+
+  
 
   // 可选字段
   employmentStatus      EmploymentStatus? // 在职状态
@@ -168,10 +170,10 @@ enum AppointmentStatus {
 model Appointment {
   id              Int               @id @default(autoincrement()) // 预约唯一标识符，自增生成
   patientId       Int // 外键，关联到Patient表的id字段
-  employeeId      Int? // 外键，关联到Employee表的employeeID字段
-  service         String // 预约的服务项目
+  employeeId      Int // 外键，关联到Employee表的employeeID字段
+  service         ConsultationProject // 预约的服务项目
   appointmentTime DateTime? // 预约时间
-  status          AppointmentStatus // 预约状态，使用枚举类型
+  status          AppointmentStatus @default(PENDING)// 预约状态，使用枚举类型
   createdAt       DateTime          @default(now()) // 创建预约的时间
 
   // 可选字段
@@ -179,7 +181,7 @@ model Appointment {
 
   // 关联到其他表
   patient         Patient @relation(fields: [patientId], references: [id])
-  employee        Employee? @relation(fields: [employeeId], references: [employeeID])
+  employee        Employee? @relation(fields: [employeeId], references: [id])
 
   // 可能还需要考虑的其他字段
   // 如预约的具体时间段，预约的种类（初诊，复诊），是否需要提醒等
@@ -194,6 +196,7 @@ model User {
   // 用户与角色的关系：一个用户只能拥有一个角色
   roleId   Int? // 外键，关联到Role表的id字段
   role     Role?   @relation(fields: [roleId], references: [id])
+  employeeId Int? @unique
 }
 
 // 定义角色类型的枚举

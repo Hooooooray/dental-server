@@ -57,7 +57,7 @@ router.post('/patient/edit', checkSchema({
         let { id, ...otherFields } = req.body;
         // avatar = Buffer.from(avatar)
         // console.log(avatar,'base64')
-    
+
         const newPatient = await prisma.Patient.update({
             where: {
                 id
@@ -134,6 +134,39 @@ router.get('/patient', checkSchema({
     } catch (error) {
         console.error('Error fetching patient by id:', error);
         res.fail('查询患者失败');
+    }
+})
+
+router.get('/searchPatients', async (req, res) => {
+    try {
+        const { keyword } = req.query
+
+        // 构建搜索条件
+        let searchConditions = [];
+        if (keyword) {
+            searchConditions.push({ name: { contains: keyword } });
+            searchConditions.push({ phone: { contains: keyword } });
+            // 尝试将 keyword 转换为数字，以便于搜索 id
+            const keywordAsNumber = parseInt(keyword, 10);
+            if (!isNaN(keywordAsNumber)) {
+                searchConditions.push({ id: keywordAsNumber });
+            }
+        }
+
+        const patients = await prisma.Patient.findMany({
+            where: {
+                OR: searchConditions
+            },
+            select: {
+                id: true,
+                name: true
+            }
+        });
+
+        res.success(patients)
+    } catch (error) {
+        console.log(error)
+        res.fail('搜索患者失败');
     }
 })
 
@@ -217,7 +250,7 @@ router.get('/patients', async (req, res) => {
             patient.patientType = enumMap.PatientType[patient.patientType]
             patient.phoneType = enumMap.PatientType[patient.phoneType]
             patient.consultationProject = enumMap.ConsultationProject[patient.consultationProject]
-            if(patient.avatar){
+            if (patient.avatar) {
                 patient.avatar = patient.avatar.toString('base64')
             }
         })

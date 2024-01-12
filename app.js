@@ -35,6 +35,10 @@ const whiteList = [
     '/reg',
     '/sendcode'
 ];
+app.use(user)
+app.use(permission)
+app.use(appointment)
+
 function verifyToken(req, res, next) {
 
     if (whiteList.includes(req.path)) {
@@ -52,13 +56,10 @@ function verifyToken(req, res, next) {
         next();
     });
 }
-
 app.use(verifyToken,patient)
 app.use(verifyToken,employee)
 app.use(verifyToken,role)
-app.use(appointment)
-app.use(permission)
-app.use(user)
+
 
 const PORT = 3006
 app.listen(PORT, () => {

@@ -30,16 +30,16 @@ router.post('/employee/add', checkSchema({
 
 // 编辑员工
 router.post('/employee/edit', checkSchema({
-    employeeID: { notEmpty: true, errorMessage: '员工ID不能为空' },
+    id: { notEmpty: true, errorMessage: '员工ID不能为空' },
 }), async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.fail(errors.array());
     }
     try {
-        const { employeeID, ...otherFields } = req.body;
+        const { id, ...otherFields } = req.body;
         const updatedEmployee = await prisma.Employee.update({
-            where: { employeeID: Number(employeeID) },
+            where: { id: Number(id) },
             data: { ...otherFields },
         });
         res.success("编辑成功");
@@ -51,16 +51,16 @@ router.post('/employee/edit', checkSchema({
 
 // 删除员工
 router.post('/employee/delete', checkSchema({
-    employeeID: { notEmpty: true, errorMessage: '员工ID不能为空' },
+    id: { notEmpty: true, errorMessage: '员工ID不能为空' },
 }), async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.fail(errors.array());
     }
     try {
-        const { employeeID } = req.body;
+        const { id } = req.body;
         await prisma.Employee.delete({
-            where: { employeeID: Number(employeeID) },
+            where: { id: Number(id) },
         });
         res.success("删除成功");
     } catch (error) {
@@ -71,12 +71,12 @@ router.post('/employee/delete', checkSchema({
 
 // 根据ID查询员工
 router.get('/employee', checkSchema({
-    employeeID: { notEmpty: true, errorMessage: '员工ID不能为空' },
+    id: { notEmpty: true, errorMessage: '员工ID不能为空' },
 }), async (req, res) => {
     try {
-        const { employeeID } = req.query;
+        const { id } = req.query;
         const employee = await prisma.Employee.findFirst({
-            where: { employeeID: Number(employeeID) },
+            where: { id: Number(id) },
         });
         res.success(employee);
     } catch (error) {
@@ -176,14 +176,47 @@ router.get('/employees', async (req, res) => {
     }
 });
 
+router.get('/searchEmployees', async (req, res) => {
+    try {
+        const { keyword } = req.query
+
+        // 构建搜索条件
+        let searchConditions = [];
+        if (keyword) {
+            searchConditions.push({ name: { contains: keyword } });
+            searchConditions.push({ phone: { contains: keyword } });
+            // 尝试将 keyword 转换为数字，以便于搜索 id
+            const keywordAsNumber = parseInt(keyword, 10);
+            if (!isNaN(keywordAsNumber)) {
+                searchConditions.push({ id: keywordAsNumber });
+            }
+        }
+
+        const employee = await prisma.Employee.findMany({
+            where: {
+                OR: searchConditions
+            },
+            select: {
+                id: true,
+                name: true
+            }
+        });
+
+        res.success(employee)
+    } catch (error) {
+        console.log(error)
+        res.fail('搜索患者失败');
+    }
+})
+
 // 查询员工号最大值
 router.get('/employee/maxID', async (req, res) => {
     try {
         const id = await prisma.Employee.findFirst({
             select: {
-                employeeID: true,
+                id: true,
             },
-            orderBy: { employeeID: 'desc' },
+            orderBy: { id: 'desc' },
         });
         res.success(id);
     } catch (error) {

@@ -12,6 +12,7 @@ router.post('/appointment/add', checkSchema({
     if (!errors.isEmpty()) {
         return res.fail(errors.array());
     }
+    
     try {
         const newAppointment = await prisma.Appointment.create({
             data: { ...req.body },
