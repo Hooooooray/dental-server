@@ -24,6 +24,11 @@ router.post('/appointment/add', checkSchema({}), async (req, res) => {
 // 查询指定时间区间的预约列表
 router.get('/appointments', async (req, res) => {
     try {
+        let page = req.query.page || 1;
+        let pageSize = req.query.pageSize || 20;
+        page = parseInt(page)
+        pageSize = parseInt(pageSize)
+
         const {startTime, endTime} = req.query;
         const where = {}
         if (startTime && endTime) {
@@ -36,8 +41,11 @@ router.get('/appointments', async (req, res) => {
         }
         // 查询指定时间区间的预约列表
         const appointments = await prisma.Appointment.findMany({
-            where
+            where,
+            skip: (page - 1) * pageSize,
+            take: pageSize,
         });
+        const total = await prisma.Appointment.count();
 
 
         const enumMap = {
@@ -53,7 +61,13 @@ router.get('/appointments', async (req, res) => {
             appointment.status = enumMap.AppointmentStatus[appointment.status]
         })
 
-        res.success(appointments);
+        const response = {
+            success: true,
+            total,
+            data: appointments,
+        };
+
+        res.status(200).json(response)
     } catch (error) {
         console.error('Error fetching appointments:', error);
         res.fail('查询预约列表失败');

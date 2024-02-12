@@ -167,7 +167,6 @@ router.get('/employees', async (req, res) => {
             success: true,
             total,
             data: employees,
-
         };
         res.status(200).json(response)
     } catch (error) {
