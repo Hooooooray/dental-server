@@ -29,8 +29,12 @@ router.get('/appointments', async (req, res) => {
         page = parseInt(page)
         pageSize = parseInt(pageSize)
 
-        const { startTime, endTime } = req.query;
         const where = {}
+
+        const { startTime, endTime,service,status,patientId,employeeId } = req.query;
+        
+        console.log(startTime,endTime,service,status,patientId,employeeId);
+
         if (startTime && endTime) {
             const startDate = new Date(startTime);
             const endDate = new Date(endTime);
@@ -39,6 +43,22 @@ router.get('/appointments', async (req, res) => {
                 lte: endDate,
             }
         }
+        if(service){
+            where.service = service
+        }
+        if(status){
+            where.status = status
+        }
+        if(patientId){
+            where.patientId = parseInt(patientId)
+        }
+        if(employeeId){
+            where.employeeId = parseInt(employeeId)
+        }
+
+        
+
+
         // 查询指定时间区间的预约列表
         const appointments = await prisma.Appointment.findMany({
             where,
