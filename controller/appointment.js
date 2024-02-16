@@ -44,11 +44,30 @@ router.get('/appointments', async (req, res) => {
             where,
             skip: (page - 1) * pageSize,
             take: pageSize,
+            include: {
+                patient: {
+                    select: {
+                        name: true,
+                        gender: true,
+                        age: true,
+                    }
+                },
+                employee: {
+                    select: {
+                        name: true,
+                    }
+                }
+            },
         });
         const total = await prisma.Appointment.count();
 
 
         const enumMap = {
+            Gender: {
+                MALE: '男',
+                FEMALE: '女',
+                UNKNOWN: '未知'
+            },
             AppointmentStatus: {
                 PENDING: '待处理',
                 CONFIRMED: '已确认',
@@ -67,6 +86,10 @@ router.get('/appointments', async (req, res) => {
 
         appointments.forEach((appointment) => {
             appointment.status = enumMap.AppointmentStatus[appointment.status]
+            appointment.service = enumMap.Service[appointment.service]
+            if(appointment.patient){
+                appointment.patient.gender = enumMap.Gender[appointment.patient.gender]
+            }
         })
 
         const response = {
