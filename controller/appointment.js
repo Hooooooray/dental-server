@@ -1,6 +1,6 @@
 import express from 'express';
-import {checkSchema, validationResult} from 'express-validator';
-import {PrismaClient} from '@prisma/client';
+import { checkSchema, validationResult } from 'express-validator';
+import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 const router = express.Router();
@@ -12,7 +12,7 @@ router.post('/appointment/add', checkSchema({}), async (req, res) => {
     }
     try {
         const newAppointment = await prisma.Appointment.create({
-            data: {...req.body},
+            data: { ...req.body },
         });
         res.success(newAppointment);
     } catch (error) {
@@ -29,7 +29,7 @@ router.get('/appointments', async (req, res) => {
         page = parseInt(page)
         pageSize = parseInt(pageSize)
 
-        const {startTime, endTime} = req.query;
+        const { startTime, endTime } = req.query;
         const where = {}
         if (startTime && endTime) {
             const startDate = new Date(startTime);
@@ -55,6 +55,14 @@ router.get('/appointments', async (req, res) => {
                 CANCELLED: '已取消',
                 COMPLETED: '已完成',
             },
+            Service: {
+                TOOTH_EXTRACTION: '拔牙',
+                TOOTH_FILLING: '补牙',
+                TOOTH_IMPLANTATION: '种牙',
+                TOOTH_INLAY: '镶牙',
+                ORTHODONTICS: '正畸',
+                TEETH_CLEANING: '洗牙'
+            }
         };
 
         appointments.forEach((appointment) => {
