@@ -226,3 +226,17 @@ model Permission {
   parent    Permission?  @relation("ChildToParent", fields: [parentId], references: [id])
   children  Permission[] @relation("ChildToParent")
 }
+
+model Shift {
+  id        Int          @id @default(autoincrement())
+  name      String       @unique
+  startTime String      // 开始时间，格式为"HH:mm"
+  endTime   String      // 结束时间，格式为"HH:mm"
+}
+
+model DoctorShift {
+  id        Int          @id @default(autoincrement())
+  employeeId Int?
+  shiftId Int?
+}
+

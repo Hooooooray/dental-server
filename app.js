@@ -8,6 +8,7 @@ import user from "./controller/user.js"
 import role from "./controller/role.js"
 import bodyParser from 'body-parser';
 import appointment from './controller/appointment.js'
+import shift from './controller/shift.js'
 
 const app = express()
 
@@ -38,6 +39,8 @@ const whiteList = [
 app.use(user)
 app.use(permission)
 app.use(appointment)
+
+app.use(shift)
 
 function verifyToken(req, res, next) {
 
