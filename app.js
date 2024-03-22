@@ -9,6 +9,7 @@ import role from "./controller/role.js"
 import bodyParser from 'body-parser';
 import appointment from './controller/appointment.js'
 import shift from './controller/shift.js'
+import doctorShift from "./controller/doctorShift.js";
 
 const app = express()
 
@@ -41,6 +42,7 @@ app.use(permission)
 app.use(appointment)
 
 app.use(shift)
+app.use(doctorShift)
 
 function verifyToken(req, res, next) {
 

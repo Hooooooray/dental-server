@@ -61,7 +61,7 @@ model Patient {
   consultationProject ConsultationProject // 咨询项目
   acceptancePerson    String // 受理人
   createdAt           DateTime            @default(now()) // 创建时间
-  appointments Appointment[]
+  appointments        Appointment[]
 
   // Optional Fields
   avatar                  Bytes?        @db.MediumBlob
@@ -130,22 +130,22 @@ enum DentalDepartment {
 }
 
 enum EmploymentStatus {
-  ACTIVE //在职
-  ON_LEAVE //休假
+  ACTIVE // 在职
+  ON_LEAVE // 休假
   PROBATION // 新增试用期状态
-  RESIGNED //离职
+  RESIGNED // 离职
 }
 
 model Employee {
-  id       Int              @id @default(autoincrement()) // 员工唯一标识符，自增生成
+  id               Int              @id @default(autoincrement()) // 员工唯一标识符，自增生成
   name             String // 员工姓名
   position         EmployeePosition // 员工岗位，使用枚举类型
   department       Department // 部门，使用枚举类型
   dentalDepartment DentalDepartment // 牙医科室，使用牙医科室的枚举类型
   gender           Gender // 性别，使用枚举类型
-  appointments Appointment[]
 
-  
+  appointments Appointment[]
+  doctorShifts DoctorShift[]
 
   // 可选字段
   employmentStatus      EmploymentStatus? // 在职状态
@@ -168,35 +168,35 @@ enum AppointmentStatus {
 
 // 定义预约表模型
 model Appointment {
-  id              Int               @id @default(autoincrement()) // 预约唯一标识符，自增生成
+  id              Int                 @id @default(autoincrement()) // 预约唯一标识符，自增生成
   patientId       Int // 外键，关联到Patient表的id字段
   employeeId      Int // 外键，关联到Employee表的employeeID字段
   service         ConsultationProject // 预约的服务项目
   appointmentTime DateTime? // 预约时间
-  status          AppointmentStatus @default(PENDING)// 预约状态，使用枚举类型
-  createdAt       DateTime          @default(now()) // 创建预约的时间
+  status          AppointmentStatus   @default(PENDING) // 预约状态，使用枚举类型
+  createdAt       DateTime            @default(now()) // 创建预约的时间
 
   // 可选字段
-  notes           String? // 预约的额外备注信息
+  notes String? // 预约的额外备注信息
 
   // 关联到其他表
-  patient         Patient @relation(fields: [patientId], references: [id])
-  employee        Employee? @relation(fields: [employeeId], references: [id])
+  patient  Patient   @relation(fields: [patientId], references: [id])
+  employee Employee? @relation(fields: [employeeId], references: [id])
 
   // 可能还需要考虑的其他字段
   // 如预约的具体时间段，预约的种类（初诊，复诊），是否需要提醒等
 }
 
 model User {
-  id       Int     @id @default(autoincrement())
-  username String  @unique
-  phone    String? @unique
-  name     String?
-  password String
+  id         Int     @id @default(autoincrement())
+  username   String  @unique
+  phone      String? @unique
+  name       String?
+  password   String
   // 用户与角色的关系：一个用户只能拥有一个角色
-  roleId   Int? // 外键，关联到Role表的id字段
-  role     Role?   @relation(fields: [roleId], references: [id])
-  employeeId Int? @unique
+  roleId     Int? // 外键，关联到Role表的id字段
+  role       Role?   @relation(fields: [roleId], references: [id])
+  employeeId Int?    @unique
 }
 
 // 定义角色类型的枚举
@@ -228,15 +228,18 @@ model Permission {
 }
 
 model Shift {
-  id        Int          @id @default(autoincrement())
-  name      String       @unique
-  startTime String      // 开始时间，格式为"HH:mm"
-  endTime   String      // 结束时间，格式为"HH:mm"
+  id        Int    @id @default(autoincrement())
+  name      String @unique
+  startTime String // 开始时间，格式为"HH:mm"
+  endTime   String // 结束时间，格式为"HH:mm"
+  doctorShifts DoctorShift[]
 }
 
 model DoctorShift {
-  id        Int          @id @default(autoincrement())
+  id         Int       @id @default(autoincrement())
   employeeId Int?
-  shiftId Int?
+  shiftId    Int?
+  week       String?
+  employee   Employee?  @relation(fields: [employeeId], references: [id])
+  shift      Shift?     @relation(fields: [shiftId], references: [id])
 }
-
