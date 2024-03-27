@@ -34,7 +34,7 @@ export default class Client {
     let client = Client.createClient(process.env['ALIBABA_CLOUD_ACCESS_KEY_ID'], process.env['ALIBABA_CLOUD_ACCESS_KEY_SECRET']);
     // 声明commandLineArgs常量，用于存储Node.js中的一个全局对象数组process.argv,该步用于测试传递给脚本的命令行参数在数组中的具体位置
     const commandLineArgs = process.argv;
-    console.log(commandLineArgs);
+    // console.log(commandLineArgs);
     // 声明phoneNumber存储Node.js中的一个全局对象数组process.argv索引值为2中的数据
     const phoneNumber = process.argv[2]
     // 声明formattedNumber存储Node.js中的一个全局对象数组process.argv索引值为3中的数据

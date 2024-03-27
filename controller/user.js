@@ -87,7 +87,7 @@ router.post('/login', checkSchema({
         console.log(user)
         if (user.password === password) {
             const token = jwt.sign(user, secretKey, { expiresIn: '48h' });
-            console.log(token)
+            // console.log(token)
             res.success({
                 token: token,
                 // roleId:user.roleId

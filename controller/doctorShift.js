@@ -51,6 +51,15 @@ router.post('/doctorShift/addOrEdit', async (req, res) => {
 
 // 查询医生排班列表
 router.get('/doctorShifts', async (req, res) => {
+    let page = req.query.page || 1;
+    let pageSize = req.query.pageSize || 20;
+    page = parseInt(page)
+    pageSize = parseInt(pageSize)
+    let position = req.query.position
+    const where = {}
+    if (position === 'DOCTOR' || position === 'COUNSELOR'){
+        where.position = position
+    }
     try {
         const doctorShifts = await prisma.Employee.findMany({
             select: {
@@ -73,7 +82,13 @@ router.get('/doctorShifts', async (req, res) => {
                         }
                     }
                 }
-            }
+            },
+            where,
+            skip: (page - 1) * pageSize,
+            take: pageSize,
+        });
+        const total = await prisma.employee.count({
+            where
         });
 
         // 定义一个枚举类型的映射表
@@ -99,6 +114,7 @@ router.get('/doctorShifts', async (req, res) => {
 
         const response = {
             success: true,
+            total,
             data: doctorShifts,
         };
         res.status(200).json(response)

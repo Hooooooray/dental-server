@@ -33,7 +33,7 @@ router.get('/appointments', async (req, res) => {
 
         const { startTime, endTime,service,status,patientId,employeeId } = req.query;
         
-        console.log(startTime,endTime,service,status,patientId,employeeId);
+        // console.log(startTime,endTime,service,status,patientId,employeeId);
 
         if (startTime && endTime) {
             const startDate = new Date(startTime);
