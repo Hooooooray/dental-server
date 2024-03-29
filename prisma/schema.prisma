@@ -64,7 +64,7 @@ model Patient {
   appointments        Appointment[]
 
   // Optional Fields
-  avatar                  Bytes?        @db.MediumBlob
+  avatar                  Bytes?         @db.MediumBlob
   phone                   String? // 手机号码
   phoneType               PhoneType? // 电话类型，使用枚举类型
   idCardNo                String? // 身份证号码
@@ -90,6 +90,7 @@ model Patient {
   otherMedicalRecordNo    String? // 其他病历号，可能是其他医疗系统中的标识符
   expiryDate              DateTime? // 身份证有效期截止日期
   medicalSocialSecurityNo String? // 医疗社保号，用于社会医疗保险标识
+  Registration            Registration[]
 }
 
 // 定义员工岗位的枚举
@@ -156,6 +157,7 @@ model Employee {
   email                 String? // 员工电子邮件地址
   birthDate             DateTime? // 出生日期
   hireDate              DateTime? // 入职日期
+  Registration          Registration[]
 }
 
 // 定义预约状态的枚举
@@ -188,15 +190,16 @@ model Appointment {
 }
 
 model User {
-  id         Int     @id @default(autoincrement())
-  username   String  @unique
-  phone      String? @unique
-  name       String?
-  password   String
+  id           Int            @id @default(autoincrement())
+  username     String         @unique
+  phone        String?        @unique
+  name         String?
+  password     String
   // 用户与角色的关系：一个用户只能拥有一个角色
-  roleId     Int? // 外键，关联到Role表的id字段
-  role       Role?   @relation(fields: [roleId], references: [id])
-  employeeId Int?    @unique
+  roleId       Int? // 外键，关联到Role表的id字段
+  role         Role?          @relation(fields: [roleId], references: [id])
+  employeeId   Int?           @unique
+  Registration Registration[]
 }
 
 // 定义角色类型的枚举
@@ -228,10 +231,10 @@ model Permission {
 }
 
 model Shift {
-  id        Int    @id @default(autoincrement())
-  name      String @unique
-  startTime String // 开始时间，格式为"HH:mm"
-  endTime   String // 结束时间，格式为"HH:mm"
+  id           Int           @id @default(autoincrement())
+  name         String        @unique
+  startTime    String // 开始时间，格式为"HH:mm"
+  endTime      String // 结束时间，格式为"HH:mm"
   doctorShifts DoctorShift[]
 }
 
@@ -240,6 +243,34 @@ model DoctorShift {
   employeeId Int?
   shiftId    Int?
   week       String?
-  employee   Employee?  @relation(fields: [employeeId], references: [id])
-  shift      Shift?     @relation(fields: [shiftId], references: [id])
+  employee   Employee? @relation(fields: [employeeId], references: [id])
+  shift      Shift?    @relation(fields: [shiftId], references: [id])
+}
+
+enum VisitingType {
+  FIRST_VISIT // 初诊
+  FOLLOW_UP // 复诊
+  RE_EXAMINATION // 复查
+  CONSULTATION // 咨询
+}
+
+enum RegistrationStatus {
+  REGISTERED // 已挂号
+  VISITED // 已就诊
+  CANCELLED // 已取消
+}
+
+model Registration {
+  id           Int                @id @default(autoincrement())
+  patientId    Int
+  employeeId   Int
+  userId       Int? // 挂号人
+  createdAt    DateTime           @default(now()) // 挂号创建时间
+  visitingType VisitingType // 就诊类型，使用VisitingType枚举
+  status       RegistrationStatus @default(REGISTERED) // 挂号状态，使用RegistrationStatus枚举
+  notes        String? // 额外备注信息
+
+  employee Employee @relation(fields: [employeeId], references: [id])
+  patient  Patient  @relation(fields: [patientId], references: [id])
+  user     User?    @relation(fields: [userId], references: [id])
 }
