@@ -1,6 +1,6 @@
 import express from 'express';
-import { checkSchema, validationResult } from 'express-validator'
-import { PrismaClient } from "@prisma/client";
+import {checkSchema, validationResult} from 'express-validator'
+import {PrismaClient} from "@prisma/client";
 
 const prisma = new PrismaClient()
 
@@ -8,11 +8,11 @@ const router = express.Router()
 
 // 新增患者
 router.post('/patient/add', checkSchema({
-    id: { notEmpty: true, errorMessage: '客户号不能为空' },
-    name: { notEmpty: true, errorMessage: '患者姓名不能为空' },
-    patientType: { notEmpty: true, errorMessage: '患者类型不能为空' },
-    consultationProject: { notEmpty: true, errorMessage: '咨询项目不能为空' },
-    acceptancePerson: { notEmpty: true, errorMessage: '受理人不能为空' },
+    id: {notEmpty: true, errorMessage: '客户号不能为空'},
+    name: {notEmpty: true, errorMessage: '患者姓名不能为空'},
+    patientType: {notEmpty: true, errorMessage: '患者类型不能为空'},
+    consultationProject: {notEmpty: true, errorMessage: '咨询项目不能为空'},
+    acceptancePerson: {notEmpty: true, errorMessage: '受理人不能为空'},
 }), async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -46,7 +46,7 @@ router.post('/patient/add', checkSchema({
 
 // 编辑患者
 router.post('/patient/edit', checkSchema({
-    id: { notEmpty: true, errorMessage: '患者id不能为空' },
+    id: {notEmpty: true, errorMessage: '患者id不能为空'},
 }), async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -54,7 +54,7 @@ router.post('/patient/edit', checkSchema({
     }
     try {
         req.prisma = prisma
-        let { id, ...otherFields } = req.body;
+        let {id, ...otherFields} = req.body;
         // avatar = Buffer.from(avatar)
         // console.log(avatar,'base64')
 
@@ -75,7 +75,7 @@ router.post('/patient/edit', checkSchema({
 
 //删除患者
 router.post('/patient/delete', checkSchema({
-    id: { notEmpty: true, errorMessage: '患者id不能为空' },
+    id: {notEmpty: true, errorMessage: '患者id不能为空'},
 }), async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -83,30 +83,7 @@ router.post('/patient/delete', checkSchema({
     }
     try {
         req.prisma = prisma
-        const { id } = req.body;
-        const newPatient = await prisma.Patient.delete({
-            where: {
-                id
-            },
-        });
-        res.success("删除成功");
-    } catch (error) {
-        console.error('Error creating patient:', error);
-        res.fail('Failed to delete the patient.');
-    }
-})
-
-// 根据id查询患者
-router.post('/patient/select', checkSchema({
-    id: { notEmpty: true, errorMessage: '患者id不能为空' },
-}), async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.fail(errors.array());
-    }
-    try {
-        req.prisma = prisma
-        const { id } = req.body;
+        const {id} = req.body;
         const newPatient = await prisma.Patient.delete({
             where: {
                 id
@@ -120,16 +97,19 @@ router.post('/patient/select', checkSchema({
 })
 
 router.get('/patient', checkSchema({
-    id: { notEmpty: true, errorMessage: "患者id不能为空" }
+    id: {notEmpty: true, errorMessage: "患者id不能为空"}
 }), async (req, res) => {
     try {
-        let { id } = req.query;
+        let {id} = req.query;
         id = Number(id)
         const patient = await prisma.Patient.findFirst({
             where: {
                 id
             }
         })
+        if (patient.avatar) {
+            patient.avatar = patient.avatar.toString('base64')
+        }
         res.success(patient)
     } catch (error) {
         console.error('Error fetching patient by id:', error);
@@ -139,17 +119,17 @@ router.get('/patient', checkSchema({
 
 router.get('/searchPatients', async (req, res) => {
     try {
-        const { keyword } = req.query
+        const {keyword} = req.query
 
         // 构建搜索条件
         let searchConditions = [];
         if (keyword) {
-            searchConditions.push({ name: { contains: keyword } });
-            searchConditions.push({ phone: { contains: keyword } });
+            searchConditions.push({name: {contains: keyword}});
+            searchConditions.push({phone: {contains: keyword}});
             // 尝试将 keyword 转换为数字，以便于搜索 id
             const keywordAsNumber = parseInt(keyword, 10);
             if (!isNaN(keywordAsNumber)) {
-                searchConditions.push({ id: keywordAsNumber });
+                searchConditions.push({id: keywordAsNumber});
             }
         }
 
@@ -159,9 +139,19 @@ router.get('/searchPatients', async (req, res) => {
             },
             select: {
                 id: true,
-                name: true
+                name: true,
+                avatar: true,
+                gender: true,
+                patientNotes: true,
+                phone: true,
             }
         });
+
+        patients.forEach((patient) => {
+            if (patient.avatar) {
+                patient.avatar = patient.avatar.toString('base64')
+            }
+        })
 
         res.success(patients)
     } catch (error) {
@@ -172,7 +162,7 @@ router.get('/searchPatients', async (req, res) => {
 
 router.get('/patients', async (req, res) => {
     try {
-        let { id, name, phone, idCardNo, isTodayOnly, sortColumn, sortOrder } = req.query;
+        let {id, name, phone, idCardNo, isTodayOnly, sortColumn, sortOrder} = req.query;
         id = Number(id)
         let page = req.query.page || 1;
         let pageSize = req.query.pageSize || 10;
@@ -181,9 +171,9 @@ router.get('/patients', async (req, res) => {
         console.log(sortColumn, sortOrder)
         let where = {};
         if (id) where.id = id;
-        if (name) where.name = { contains: name };
-        if (phone) where.phone = { contains: phone };
-        if (idCardNo) where.idCardNo = { contains: idCardNo }
+        if (name) where.name = {contains: name};
+        if (phone) where.phone = {contains: phone};
+        if (idCardNo) where.idCardNo = {contains: idCardNo}
         if (isTodayOnly === 'true') {
             const today = new Date();
             const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
@@ -203,7 +193,7 @@ router.get('/patients', async (req, res) => {
             where: where,
             orderBy: orderBy
         });
-        const total = await prisma.patient.count({ where: where });
+        const total = await prisma.patient.count({where: where});
         const enumMap = {
             Gender: {
                 MALE: '男',
@@ -274,7 +264,7 @@ router.get('/patient/maxID', async (req, res) => {
             select: {
                 id: true,
             },
-            orderBy: { id: 'desc' },
+            orderBy: {id: 'desc'},
         });
         res.success(id);
     } catch (error) {
