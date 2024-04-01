@@ -52,4 +52,19 @@ router.post('/registration/edit', checkSchema({
     }
 })
 
+router.get('/registration/maxID', async (req, res) => {
+    try {
+        const id = await prisma.Registration.findFirst({
+            select: {
+                id: true,
+            },
+            orderBy: {id: 'desc'},
+        });
+        res.success(id);
+    } catch (error) {
+        console.error('Error fetching Registration:', error);
+        res.fail('查询挂号id失败');
+    }
+})
+
 export default router;

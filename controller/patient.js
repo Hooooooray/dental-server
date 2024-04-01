@@ -110,6 +110,26 @@ router.get('/patient', checkSchema({
         if (patient.avatar) {
             patient.avatar = patient.avatar.toString('base64')
         }
+        const enumMap = {
+            PatientType: {
+                TEMPORARY: '临时',
+                ORDINARY: '普通',
+                DENTAL_IMPLANTATION: '牙医种植',
+                DENTAL_ORTHODONTICS: '牙医正畸',
+                DENTAL_RESTORATION: '牙医修复',
+                DENTAL_CARE: '牙医护理',
+                CHILDRENS_TEETH: '儿童牙齿',
+                INFORMATION: '资讯',
+                TOOTH_EXTRACTION: '拔牙',
+                TOOTH_INLAY: '镶牙',
+                PERIODONTAL: '牙周',
+                ORTHODONTICS: '矫正',
+                IMPLANTATION: '种植'
+            }
+        };
+        if (patient.patientType){
+            patient.patientTypeName = enumMap.PatientType[patient.patientType]
+        }
         res.success(patient)
     } catch (error) {
         console.error('Error fetching patient by id:', error);
