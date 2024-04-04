@@ -90,6 +90,7 @@ model Patient {
   otherMedicalRecordNo    String? // 其他病历号，可能是其他医疗系统中的标识符
   expiryDate              DateTime? // 身份证有效期截止日期
   medicalSocialSecurityNo String? // 医疗社保号，用于社会医疗保险标识
+  lastDoctor              String? //上次接诊医生
   Registration            Registration[]
 }
 

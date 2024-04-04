@@ -1,17 +1,17 @@
 import express from 'express';
-import { checkSchema, validationResult } from 'express-validator';
-import { PrismaClient } from '@prisma/client';
+import {checkSchema, validationResult} from 'express-validator';
+import {PrismaClient} from '@prisma/client';
 
 const prisma = new PrismaClient();
 const router = express.Router();
 
 // 新增员工
 router.post('/employee/add', checkSchema({
-    name: { notEmpty: true, errorMessage: '员工姓名不能为空' },
-    position: { notEmpty: true, errorMessage: '员工岗位不能为空' },
-    department: { notEmpty: true, errorMessage: '部门不能为空' },
-    dentalDepartment: { notEmpty: true, errorMessage: '牙医科室不能为空' },
-    gender: { notEmpty: true, errorMessage: '性别不能为空' },
+    name: {notEmpty: true, errorMessage: '员工姓名不能为空'},
+    position: {notEmpty: true, errorMessage: '员工岗位不能为空'},
+    department: {notEmpty: true, errorMessage: '部门不能为空'},
+    dentalDepartment: {notEmpty: true, errorMessage: '牙医科室不能为空'},
+    gender: {notEmpty: true, errorMessage: '性别不能为空'},
 }), async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -19,7 +19,7 @@ router.post('/employee/add', checkSchema({
     }
     try {
         const newEmployee = await prisma.Employee.create({
-            data: { ...req.body },
+            data: {...req.body},
         });
         res.success(newEmployee);
     } catch (error) {
@@ -30,17 +30,17 @@ router.post('/employee/add', checkSchema({
 
 // 编辑员工
 router.post('/employee/edit', checkSchema({
-    id: { notEmpty: true, errorMessage: '员工ID不能为空' },
+    id: {notEmpty: true, errorMessage: '员工ID不能为空'},
 }), async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.fail(errors.array());
     }
     try {
-        const { id, ...otherFields } = req.body;
+        const {id, ...otherFields} = req.body;
         const updatedEmployee = await prisma.Employee.update({
-            where: { id: Number(id) },
-            data: { ...otherFields },
+            where: {id: Number(id)},
+            data: {...otherFields},
         });
         res.success("编辑成功");
     } catch (error) {
@@ -51,16 +51,16 @@ router.post('/employee/edit', checkSchema({
 
 // 删除员工
 router.post('/employee/delete', checkSchema({
-    id: { notEmpty: true, errorMessage: '员工ID不能为空' },
+    id: {notEmpty: true, errorMessage: '员工ID不能为空'},
 }), async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.fail(errors.array());
     }
     try {
-        const { id } = req.body;
+        const {id} = req.body;
         await prisma.Employee.delete({
-            where: { id: Number(id) },
+            where: {id: Number(id)},
         });
         res.success("删除成功");
     } catch (error) {
@@ -71,12 +71,12 @@ router.post('/employee/delete', checkSchema({
 
 // 根据ID查询员工
 router.get('/employee', checkSchema({
-    id: { notEmpty: true, errorMessage: '员工ID不能为空' },
+    id: {notEmpty: true, errorMessage: '员工ID不能为空'},
 }), async (req, res) => {
     try {
-        const { id } = req.query;
+        const {id} = req.query;
         const employee = await prisma.Employee.findFirst({
-            where: { id: Number(id) },
+            where: {id: Number(id)},
         });
         res.success(employee);
     } catch (error) {
@@ -86,21 +86,40 @@ router.get('/employee', checkSchema({
 });
 
 
-
-
 // 查询所有员工
 router.get('/employees', async (req, res) => {
     try {
-        // const employees = await prisma.Employee.findMany();
         let page = req.query.page || 1;
         let pageSize = req.query.pageSize || 20;
         page = parseInt(page)
         pageSize = parseInt(pageSize)
+        const where = {}
+        const position = req.query.position
+        const keyword = req.query.keyword
+        let searchConditions = [];
+        if (keyword) {
+            searchConditions.push({name: {contains: keyword}});
+            searchConditions.push({phone: {contains: keyword}});
+            const keywordAsNumber = parseInt(keyword, 10);
+            if (!isNaN(keywordAsNumber)) {
+                searchConditions.push({id: keywordAsNumber});
+            }
+        }
+        if (position) {
+            where.position = position
+        }
+        if (keyword) {
+            where.OR = searchConditions
+        }
+
         const employees = await prisma.Employee.findMany({
             skip: (page - 1) * pageSize,
             take: pageSize,
+            where: where
         });
-        const total = await prisma.employee.count();
+        const total = await prisma.Employee.count({
+            where: where
+        });
 
         // 定义一个枚举类型的映射表
         const enumMap = {
@@ -177,17 +196,17 @@ router.get('/employees', async (req, res) => {
 
 router.get('/searchEmployees', async (req, res) => {
     try {
-        const { keyword } = req.query
+        const {keyword} = req.query
 
         // 构建搜索条件
         let searchConditions = [];
         if (keyword) {
-            searchConditions.push({ name: { contains: keyword } });
-            searchConditions.push({ phone: { contains: keyword } });
+            searchConditions.push({name: {contains: keyword}});
+            searchConditions.push({phone: {contains: keyword}});
             // 尝试将 keyword 转换为数字，以便于搜索 id
             const keywordAsNumber = parseInt(keyword, 10);
             if (!isNaN(keywordAsNumber)) {
-                searchConditions.push({ id: keywordAsNumber });
+                searchConditions.push({id: keywordAsNumber});
             }
         }
 
@@ -215,7 +234,7 @@ router.get('/employee/maxID', async (req, res) => {
             select: {
                 id: true,
             },
-            orderBy: { id: 'desc' },
+            orderBy: {id: 'desc'},
         });
         res.success(id);
     } catch (error) {
@@ -223,7 +242,6 @@ router.get('/employee/maxID', async (req, res) => {
         res.fail('查询员工失败');
     }
 })
-
 
 
 export default router;
