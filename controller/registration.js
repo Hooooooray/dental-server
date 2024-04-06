@@ -58,9 +58,11 @@ router.get('/registrations', async (req, res) => {
             include: {
                 patient: {
                     select: {
+                        id:true,
                         name: true,
                         gender: true,
                         age: true,
+                        avatar:true
                     }
                 },
                 employee: {
@@ -92,6 +94,9 @@ router.get('/registrations', async (req, res) => {
         registrations.forEach(registration => {
             if (registration.patient) {
                 registration.patient.gender = enumMap.Gender[registration.patient.gender]
+                if (registration.patient.avatar) {
+                    registration.patient.avatar = registration.patient.avatar.toString('base64')
+                }
             }
             if (registration.status) {
                 registration.status = enumMap.Status[registration.status]
