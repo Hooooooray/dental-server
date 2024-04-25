@@ -276,12 +276,29 @@ model Registration {
   user     User?    @relation(fields: [userId], references: [id])
 }
 
-// 分类
 model Category {
   id       Int        @id @default(autoincrement())
   name     String     @unique
   parentId Int?
   parent   Category?  @relation("ParentChild", fields: [parentId], references: [id], onDelete: Cascade)
   children Category[] @relation("ParentChild")
+  items    Item[]
 }
+
+
+// 物品
+model Item {
+  id         Int      @id @default(autoincrement())
+  name       String
+  model       String?          // 型号
+  brand       String?          // 品牌
+  expiration  String?       // 保质期，可选字段
+  description String?         // 描述，可选字段
+  isActive    Boolean?         // 是否启用
+  specifications Json?
+
+  categoryId Int
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+}
+
 

@@ -12,6 +12,7 @@ import shift from './controller/shift.js'
 import doctorShift from "./controller/doctorShift.js";
 import registration from "./controller/registration.js";
 import category from "./controller/category.js";
+import item from "./controller/item.js";
 
 const app = express()
 
@@ -47,6 +48,7 @@ app.use(shift)
 app.use(doctorShift)
 app.use(registration)
 app.use(category)
+app.use(item)
 
 function verifyToken(req, res, next) {
 
