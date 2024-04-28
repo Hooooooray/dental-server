@@ -59,6 +59,15 @@ router.post('/employee/delete', checkSchema({
     }
     try {
         const {id} = req.body;
+        // 删除所有相关的预约
+        await prisma.appointment.deleteMany({
+            where: {patientId: id}
+        });
+
+        // 删除所有相关的挂号
+        await prisma.registration.deleteMany({
+            where: {patientId: id}
+        });
         await prisma.Employee.delete({
             where: {id: Number(id)},
         });

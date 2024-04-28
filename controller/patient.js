@@ -84,6 +84,15 @@ router.post('/patient/delete', checkSchema({
     try {
         req.prisma = prisma
         const {id} = req.body;
+        // 删除所有相关的预约
+        await prisma.appointment.deleteMany({
+            where: {patientId: id}
+        });
+
+        // 删除所有相关的挂号
+        await prisma.registration.deleteMany({
+            where: {patientId: id}
+        });
         const newPatient = await prisma.Patient.delete({
             where: {
                 id
@@ -127,7 +136,7 @@ router.get('/patient', checkSchema({
                 IMPLANTATION: '种植'
             }
         };
-        if (patient.patientType){
+        if (patient.patientType) {
             patient.patientTypeName = enumMap.PatientType[patient.patientType]
         }
         res.success(patient)
