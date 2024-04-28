@@ -47,7 +47,7 @@ router.post('/item/delete', checkSchema({
 
 
 // 修改物品
-router.post('/item/update', checkSchema({
+router.post('/item/edit', checkSchema({
     id: { notEmpty: true, errorMessage: '物品ID不能为空' },
 }), async (req, res) => {
     const errors = validationResult(req);
@@ -68,15 +68,57 @@ router.post('/item/update', checkSchema({
 });
 
 // 查询物品列表
+// router.get('/items', async (req, res) => {
+//     try {
+//         const items = await prisma.Item.findMany();
+//         res.success(items);
+//     } catch (error) {
+//         console.error('Error fetching items:', error);
+//         res.fail('查询物品列表失败');
+//     }
+// });
+// 查询物品列表
 router.get('/items', async (req, res) => {
+    const { categoryId } = req.query;
+
     try {
-        const items = await prisma.Item.findMany();
+        // 查询所有子分类ID（如果categoryId存在）
+        let categoryIds = [];
+        if (categoryId) {
+            categoryIds = await getSubcategoryIds(Number(categoryId)); // 假设这是一个递归查询子类ID的函数
+        }
+
+        // 构建查询条件
+        let where = {};
+        if (categoryId) {
+            where.categoryId = { in: categoryIds };
+        }
+
+        const items = await prisma.Item.findMany({
+            where: where
+        });
+
         res.success(items);
     } catch (error) {
         console.error('Error fetching items:', error);
         res.fail('查询物品列表失败');
     }
 });
+
+// 假设的递归查询函数
+async function getSubcategoryIds(parentId) {
+    const categories = await prisma.Category.findMany({
+        where: { parentId: parentId },
+        select: { id: true }
+    });
+    let ids = [parentId];
+    for (const category of categories) {
+        const subIds = await getSubcategoryIds(category.id); // 递归查询子类ID
+        ids = ids.concat(subIds);
+    }
+    return ids;
+}
+
 
 export default router;
 
